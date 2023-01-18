@@ -85,7 +85,7 @@ class VMPatcher:
                 for attr in s:
                     setattr(self, attr, snap[attr])
 
-    def export(self, fname: str = "boa_state.json"):
+    def export_state(self, fname: str = "boa_state.json"):
         snap = {}
         for s, _ in self._patchables:
             for attr in s:
@@ -93,7 +93,7 @@ class VMPatcher:
         out_file = "{}/{}".format(os.getcwd(), fname)
         json.dump(snap, out_file)
 
-    def import(self, fname):
+    def load_state(self, fname: str):
         snap = json.loads(fname)
         for s, _ in self._patchables:
             for attr in s:
