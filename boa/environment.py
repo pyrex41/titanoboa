@@ -5,7 +5,7 @@ import contextlib
 import logging
 import sys
 import os
-import json
+import pickle
 from typing import Any, Iterator, Optional, Union
 
 import eth.constants as constants
@@ -399,11 +399,11 @@ class Env:
         snap['id'] = self.vm.state.snapshot()
         out_file = "{}/{}".format(os.getcwd(), file_name)
         with open(out_file, "w") as file:
-            json.dump(snap, file)
+            pickle.dump(snap, file)
 
     def load_state(self, file_name: str):
         with open(file_name, "r") as file:
-            snap = json.load(file)
+            snap = pickle.load(file)
         snapshot_id = snap.pop('id')
         self.vm.patch.load_state(snap)
         sekf.vm.state.revert(snapshot_id)
