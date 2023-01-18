@@ -398,11 +398,11 @@ class Env:
         snap = self.vm.patch.export_state()
         snap['id'] = self.vm.state.snapshot()
         out_file = "{}/{}".format(os.getcwd(), file_name)
-        with open(out_file, "w") as file:
+        with open(out_file, "wb") as file:
             pickle.dump(snap, file)
 
     def load_state(self, file_name: str):
-        with open(file_name, "r") as file:
+        with open(file_name, "rb") as file:
             snap = pickle.load(file)
         snapshot_id = snap.pop('id')
         self.vm.patch.load_state(snap)
