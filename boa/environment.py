@@ -91,9 +91,11 @@ class VMPatcher:
         for s, _ in self._patchables:
             for attr in s:
                 snap[attr] = getattr(self, attr)
+        snap['prev_hashes'] = list(snap['prev_hashes'])
         return snap
 
     def load_state(self, snap: dict):
+        snap['prev_hashes'] = (x for x in snap['prev_hashes'])
         for s, _ in self._patchables:
             for attr in s:
                 setattr(self, attr, snap[attr])
