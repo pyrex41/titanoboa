@@ -408,7 +408,7 @@ class Env:
             snap = pickle.load(file)
         snapshot_id = snap.pop('id')
         self.vm.patch.load_state(snap)
-        sekf.vm.state.revert(snapshot_id)
+        self.vm.state.revert(snapshot_id)
 
     # TODO is this a good name
     @contextlib.contextmanager
