@@ -90,11 +90,9 @@ class VMPatcher:
         for s, _ in self._patchables:
             for attr in s:
                 snap[attr] = getattr(self, attr)
-        out_file = "{}/{}".format(os.getcwd(), fname)
-        json.dump(snap, out_file)
+        return snap
 
-    def load_state(self, fname: str):
-        snap = json.loads(fname)
+    def load_state(self, snap: dict):
         for s, _ in self._patchables:
             for attr in s:
                 setattr(self, attr, snap[attr])
@@ -394,6 +392,18 @@ class Env:
                 yield
         finally:
             self.vm.state.revert(snapshot_id)
+
+    def export_state(self, file_name: str = "boa_env_state.json"):
+        snap = self.vm.patch.export_state()
+        snap['id'] = self.vm.state.snapshot()
+        out_file = "{}/{}".format(os.getcwd(), file_name)
+        json.dump(snap, out_file)
+
+    def load_state(self, file_name: str):
+        snap = json.loads(file_name)
+        snapshot_id = snap.pop('id')
+        self.vm.patch.load_state(snap)
+        sekf.vm.state.revert(snapshot_id)
 
     # TODO is this a good name
     @contextlib.contextmanager
