@@ -4,6 +4,7 @@
 import contextlib
 import logging
 import sys
+import json
 from typing import Any, Iterator, Optional, Union
 
 import eth.constants as constants
@@ -83,6 +84,21 @@ class VMPatcher:
             for s, _ in self._patchables:
                 for attr in s:
                     setattr(self, attr, snap[attr])
+
+    def export(self, fname: str = "boa_state.json"):
+        snap = {}
+        for s, _ in self._patchables:
+            for attr in s:
+                snap[attr] = getattr(self, attr)
+        out_file = "{}/{}".format(os.getcwd(), fname)
+        json.dump(snap, out_file)
+
+    def import(self, fname):
+        snap = json.loads(fname)
+        for s, _ in self._patchables:
+            for attr in s:
+                setattr(self, attr, snap[attr])
+
 
 
 AddressT = Union[Address, bytes, str]  # make mypy happy
