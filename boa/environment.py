@@ -13,6 +13,7 @@ import eth.tools.builder.chain as chain
 import eth.vm.forks.spurious_dragon.computation as spurious_dragon
 from eth.chains.mainnet import MainnetChain
 from eth.db.atomic import AtomicDB
+from eth.db.account import AccountDB
 from eth.vm.code_stream import CodeStream
 from eth.vm.message import Message
 from eth.vm.opcode_values import STOP
