@@ -17,6 +17,7 @@ from eth.vm.code_stream import CodeStream
 from eth.vm.message import Message
 from eth.vm.opcode_values import STOP
 from eth.vm.transaction_context import BaseTransactionContext
+from eth._utils.generator import CachedIterable
 from eth_abi import decode_single
 from eth_typing import Address
 from eth_utils import setup_DEBUG2_logging, to_canonical_address, to_checksum_address
@@ -91,12 +92,11 @@ class VMPatcher:
         for s, _ in self._patchables:
             for attr in s:
                 snap[attr] = getattr(self, attr)
-        snap['prev_hashes'] = list(snap['prev_hashes'])
-        print(snap)
+        snap['prev_hashes'] = snap['prev_hashes']._cached_results
         return snap
 
     def load_state(self, snap: dict):
-        #snap['prev_hashes'] = (x for x in snap['prev_hashes'])
+        snap['prev_hashes'] = CachedIterable(snap['prev_hashes'])
         for s, _ in self._patchables:
             for attr in s:
                 setattr(self, attr, snap[attr])
