@@ -97,7 +97,6 @@ class VMPatcher:
 
     def load_state(self, snap: dict):
         snap['prev_hashes'] = CachedIterable(snap['prev_hashes'])
-        db = snap.pop('db')
         self.chain = _make_chain(db)
         for s, _ in self._patchables:
             for attr in s:
