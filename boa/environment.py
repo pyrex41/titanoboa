@@ -92,6 +92,7 @@ class VMPatcher:
             for attr in s:
                 snap[attr] = getattr(self, attr)
         snap['prev_hashes'] = list(snap['prev_hashes'])
+        print(snap)
         return snap
 
     def load_state(self, snap: dict):
@@ -398,6 +399,7 @@ class Env:
 
     def export_state(self, file_name: str = "boa_env_state.pickle"):
         snap = self.vm.patch.export_state()
+        print(snap)
         out_file = "{}/{}".format(os.getcwd(), file_name)
         with open(out_file, "wb") as file:
             pickle.dump(snap, file)
