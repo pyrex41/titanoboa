@@ -97,6 +97,8 @@ class VMPatcher:
 
     def load_state(self, snap: dict):
         snap['prev_hashes'] = CachedIterable(snap['prev_hashes'])
+        db = snap.pop('db')
+        self.chain = _make_chain(db)
         for s, _ in self._patchables:
             for attr in s:
                 setattr(self, attr, snap[attr])
@@ -399,7 +401,7 @@ class Env:
 
     def export_state(self, file_name: str = "boa_env_state.pickle"):
         snap = self.vm.patch.export_state()
-        print(snap)
+        snap['db'] = self.chain.chaindb.db
         out_file = "{}/{}".format(os.getcwd(), file_name)
         with open(out_file, "wb") as file:
             pickle.dump(snap, file)
@@ -407,6 +409,8 @@ class Env:
     def load_state(self, file_name: str):
         with open(file_name, "rb") as file:
             snap = pickle.load(file)
+        db = snap.pop('db')
+        self.chain = _make_chain(db)
         self.vm.patch.load_state(snap)
 
     # TODO is this a good name
@@ -524,8 +528,8 @@ GENESIS_PARAMS = {"difficulty": constants.GENESIS_DIFFICULTY, "gas_limit": int(1
 
 # TODO make fork configurable - ex. "latest", "frontier", "berlin"
 # TODO make genesis params+state configurable
-def _make_chain():
+def _make_chain(db: AtomicDB = AtomicDB()):
     # TODO should we use MiningChain? is there a perf difference?
     # TODO debug why `fork_at()` cannot accept 0 as block num
     _Chain = chain.build(MainnetChain, chain.latest_mainnet_at(1))
-    return _Chain.from_genesis(AtomicDB(), GENESIS_PARAMS)
+    return _Chain.from_genesis(db, GENESIS_PARAMS)
