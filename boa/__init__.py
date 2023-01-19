@@ -31,7 +31,7 @@ def set_env(new_env):
 def reset_env():
     set_env(Env())
 
-def reload_env(db: AtomicDb):
+def reload_env(db: AtomicDB):
     set_env(Env(db))
 
 @contextlib.contextmanager
