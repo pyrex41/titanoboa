@@ -87,22 +87,6 @@ class VMPatcher:
                 for attr in s:
                     setattr(self, attr, snap[attr])
 
-    def export_state(self):
-        snap = {}
-        for s, _ in self._patchables:
-            for attr in s:
-                snap[attr] = getattr(self, attr)
-        snap['prev_hashes'] = snap['prev_hashes']._cached_results
-        return snap
-
-    def load_state(self, snap: dict):
-        snap['prev_hashes'] = CachedIterable(snap['prev_hashes'])
-        for s, _ in self._patchables:
-            for attr in s:
-                setattr(self, attr, snap[attr])
-
-
-
 AddressT = Union[Address, bytes, str]  # make mypy happy
 
 
@@ -343,6 +327,16 @@ class Env:
         self.vm.patch.timestamp = int(block_info["timestamp"], 16)
         self.vm.patch.block_number = int(block_info["number"], 16)
         # TODO patch the other stuff
+        #
+    def load_state(self, db: AtomicDB):
+        self.vm.__class__.state_class.account_db_class = AccountDB
+        self.chain = _make_chain(db)
+        self._init_vm()
+        block_info = self.vm.state._account_db._block_info
+
+        self.vm.patch.timestamp = int(block_info["timestamp"], 16)
+        self.vm.patch.block_number = int(block_info["number"], 16)
+
 
     def set_gas_meter_class(self, cls: type) -> None:
         self.vm.state.computation_class._gas_meter_class = cls
@@ -398,18 +392,10 @@ class Env:
             self.vm.state.revert(snapshot_id)
 
     def export_state(self, file_name: str = "boa_env_state.pickle"):
-        snap = self.vm.patch.export_state()
-        snap['db'] = self.chain.chaindb.db
+        snap = {'db': self.chain.chaindb.db}
         out_file = "{}/{}".format(os.getcwd(), file_name)
         with open(out_file, "wb") as file:
             pickle.dump(snap, file)
-
-    def load_state(self, file_name: str):
-        with open(file_name, "rb") as file:
-            snap = pickle.load(file)
-        if 'db' in snap:
-            snap.pop('db')
-        self.vm.patch.load_state(snap)
 
     # TODO is this a good name
     @contextlib.contextmanager
