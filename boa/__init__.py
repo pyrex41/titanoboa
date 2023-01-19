@@ -1,5 +1,6 @@
 import contextlib
 import sys
+from eth.db.atomic import AtomicDB
 
 from boa.environment import (
     Env,
@@ -30,6 +31,8 @@ def set_env(new_env):
 def reset_env():
     set_env(Env())
 
+def reload_env(db: AtomicDb):
+    set_env(Env(db))
 
 @contextlib.contextmanager
 def reverts(*args, **kwargs):

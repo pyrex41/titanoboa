@@ -268,8 +268,8 @@ class Env:
     _singleton = None
     _initial_address_counter = 100
 
-    def __init__(self):
-        self.chain = _make_chain()
+    def __init__(self, db: AtomicDB = AtomicDB()):
+        self.chain = _make_chain(db)
 
         self._gas_price = 0
 
@@ -407,8 +407,8 @@ class Env:
     def load_state(self, file_name: str):
         with open(file_name, "rb") as file:
             snap = pickle.load(file)
-        db = snap.pop('db')
-        self.chain = _make_chain(db)
+        if 'db' in snap:
+            snap.pop('db')
         self.vm.patch.load_state(snap)
 
     # TODO is this a good name
@@ -526,7 +526,7 @@ GENESIS_PARAMS = {"difficulty": constants.GENESIS_DIFFICULTY, "gas_limit": int(1
 
 # TODO make fork configurable - ex. "latest", "frontier", "berlin"
 # TODO make genesis params+state configurable
-def _make_chain(db: AtomicDB = AtomicDB()):
+def _make_chain(db: AtomicDB):
     # TODO should we use MiningChain? is there a perf difference?
     # TODO debug why `fork_at()` cannot accept 0 as block num
     _Chain = chain.build(MainnetChain, chain.latest_mainnet_at(1))
